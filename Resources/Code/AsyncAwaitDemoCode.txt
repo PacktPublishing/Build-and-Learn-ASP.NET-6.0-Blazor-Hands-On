@@ -1,0 +1,36 @@
+using System;
+using System.Threading.Tasks;
+
+namespace AsyncAwaitDemo
+{
+    class Program
+    {
+        public static void Main()
+        {
+            var demoMethod = DemoMethodAsync("Task1"); //Task started for Execution and immediately goes to Line 19 of the code. Cursor will come back as soon as await operator is met		
+            Console.WriteLine("Cursor Moved to Next Line in Main() Without Waiting for DemoMethodAsync() completion");
+            var longRunningMethod = LongRunningOperationAsync("Task2");
+            Console.WriteLine("Now Waiting for Task to be Finished");
+            Task.WaitAll(demoMethod, longRunningMethod); //Now Waiting		
+            Console.WriteLine("Exiting CommandLine");
+        }
+        public static async Task DemoMethodAsync(string taskName)
+        {
+            Task<string> longRunningTask = LongRunningOperationAsync(taskName);
+            // independent work which doesn't need the result of LongRunningOperationAsync can be done here
+            Console.WriteLine("Work now executes independently in DemoMethodAsync()");
+            //and now we call await on the task 
+            string result = await longRunningTask;
+            //use the result 
+            Console.WriteLine($"Result of LongRunningOperation() is {result}");
+        }
+
+        public static async Task<string> LongRunningOperationAsync(string taskName) // assume we return an int from this long running operation 
+        {
+            Console.WriteLine($"LongRunningOperation() Started for {taskName}");
+            await Task.Delay(2000); // 2 second delay         
+            Console.WriteLine($"LongRunningOperation() Finished after 2 Seconds for {taskName}");
+            return "\"Hello there from long operation\"";
+        }
+    }
+}
